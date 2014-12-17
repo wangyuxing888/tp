@@ -1,0 +1,25 @@
+<?php
+require '../../../admin/function/function_base.php';
+require '../../../admin/function/function_admin.php';
+$tqb->Load();
+$action='root';
+if (!$tqb->CheckRights($action)) {$tqb->ShowError(6);die();}
+if (!$tqb->CheckPlugin('<%appid%>')) {$tqb->ShowError(48);die();}
+
+$blogtitle='<%appid%>';
+require $blogpath . 'admin/admin/admin_header.php';
+require $blogpath . 'admin/admin/admin_top.php';
+?>
+<div id="divMain">
+  <div class="divHeader"><?php echo $blogtitle;?></div>
+  <div class="SubMenu">
+  </div>
+  <div id="divMain2">
+<!--代码-->
+  </div>
+</div>
+
+<?php
+require $blogpath . 'admin/admin/admin_footer.php';
+RunTime();
+?>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<theme version="php">
+<id>default</id>
+<name>默认主题</name>
+<url>http://www.tqtqtq.com/</url>
+<note>TQBlog的默认主题</note>
+<description>TQBlog的默认主题.设计者：TQBlog Team.</description>
+<path></path>
+<include></include>
+<level>1</level>
+<author>
+  <name>TQBlog Team</name>
+  <email>tqblog@tqtqtq.com</email>
+  <url>http://www.tqtqtq.com/</url>
+</author>
+<source>
+  <name></name>
+  <email></email>
+  <url></url>
+</source>
+<adapted>20080222</adapted>
+<version>2.0</version>
+<pubdate>2008-02-22</pubdate>
+<modified>2014-01-01</modified>
+<price>0</price>
+<advanced>
+  <dependency></dependency>
+  <rewritefunctions></rewritefunctions>
+  <conflict></conflict>
+</advanced>
+<sidebars>
+  <sidebar1></sidebar1>
+  <sidebar2></sidebar2>
+  <sidebar3></sidebar3>
+  <sidebar4></sidebar4>
+  <sidebar5></sidebar5>
+</sidebars>
+</theme>
