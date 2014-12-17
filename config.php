@@ -5,7 +5,7 @@ return array (
   'CFG_SQLITE_PRE' => 'tqb_',
   'CFG_MYSQL_SERVER' => '127.0.0.1',
   'CFG_MYSQL_USERNAME' => 'root',
-  'CFG_MYSQL_PASSWORD' => '123456',
+  'CFG_MYSQL_PASSWORD' => 'wyx323715',
   'CFG_MYSQL_NAME' => 'tp',
   'CFG_MYSQL_CHARSET' => 'utf8',
   'CFG_MYSQL_PRE' => 'tqb_',
