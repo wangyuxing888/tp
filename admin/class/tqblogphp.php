@@ -1,11 +1,5 @@
 <?php
 
-/**
- * [TQBlog] (C)2008-2028 tqtqtq.com
- * @author TQBlog Team
- * This is NOT a freeware, use is subject to license terms
- * $Id: tqblogphp.php 33828 2008-02-22 09:25:26Z team $
- */
 class TQBlogPHP {
 
     private static $_tqb = null;
@@ -207,42 +201,26 @@ class TQBlogPHP {
     }
 
     public function Load() {
-
-        if (!$this->isinitialize)
+        if (!$this->isinitialize) {
             return false;
-
+        }
         $this->StartGzip();
-
         $this->LoadMembers();
-
         $this->LoadCategorys();
         #$this->LoadTags();
         $this->LoadModules();
-
         $this->Verify();
-
         $this->MakeTemplatetags();
-
         $this->LoadTemplates();
-
         $this->RegBuildModule('catalog', 'BuildModule_catalog');
-
         $this->RegBuildModule('calendar', 'BuildModule_calendar');
-
         $this->RegBuildModule('comments', 'BuildModule_comments');
-
         $this->RegBuildModule('previous', 'BuildModule_previous');
-
         $this->RegBuildModule('archives', 'BuildModule_archives');
-
         $this->RegBuildModule('navbar', 'BuildModule_navbar');
-
         $this->RegBuildModule('tags', 'BuildModule_tags');
-
         $this->RegBuildModule('statistics', 'BuildModule_statistics');
-
         $this->RegBuildModule('authors', 'BuildModule_authors');
-
         foreach ($GLOBALS['Filter_Plugin_Tqb_Load'] as $fpname => &$fpsignal)
             $fpname();
 
@@ -493,12 +471,7 @@ class TQBlogPHP {
 
 //********************************************************
 #权限及验证类
-
-
-
-
     function CheckRights($action) {
-
         foreach ($GLOBALS['Filter_Plugin_Tqb_CheckRights'] as $fpname => &$fpsignal) {
             $fpreturn = $fpname($action);
             if ($fpsignal == PLUGIN_EXITSIGNAL_RETURN) {
@@ -717,14 +690,12 @@ class TQBlogPHP {
     }
 
     public function LoadModules() {
-
         $array = $this->GetModuleList();
         foreach ($array as $m) {
             $this->modules[] = $m;
 
             $this->modulesbyfilename[$m->FileName] = $m;
         }
-
         $dir = $this->contentdir . 'theme/' . $this->theme . '/include/';
         if (!file_exists($dir))
             return null;

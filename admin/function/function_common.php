@@ -53,6 +53,7 @@ function GetGuid() {
     $s = str_replace('.', '', trim(uniqid('tqb', true), 'tqb'));
     return $s;
 }
+
 /**
  * 获取服务器端变量
  * @param type $name
@@ -136,6 +137,7 @@ function GetHttpContent($url) {
     }
     return $r;
 }
+
 /**
  * 获取指定目录下面的目录列表（仅限一层）
  * @param type $dir
@@ -165,6 +167,7 @@ function GetDirsInDir($dir) {
     }
     return $dirs;
 }
+
 /**
  * 获取指定目录下面指定的目录名称
  * @param type $dir 名录名称
@@ -242,6 +245,7 @@ function SetHttpStatusCode($number) {
 
     return true;
 }
+
 /**
  * 重定向页面
  * @param type $url
@@ -290,6 +294,7 @@ function Http304($filename, $time) {
 function GetGuestIP() {
     return $_SERVER["REMOTE_ADDR"];
 }
+
 /**
  * 获取浏览器信息
  * @return type
@@ -297,6 +302,7 @@ function GetGuestIP() {
 function GetGuestAgent() {
     return $_SERVER["HTTP_USER_AGENT"];
 }
+
 /**
  * 获取URI
  * @return string
@@ -310,6 +316,7 @@ function GetRequestUri() {
     }
     return $url;
 }
+
 /**
  * 文件的扩展名
  * @param type $f
@@ -321,6 +328,7 @@ function GetFileExt($f) {
     $a = explode('.', $f);
     return strtolower(end($a));
 }
+
 /**
  * 获取文件权限 0777
  * @param type $f
@@ -332,6 +340,7 @@ function GetFilePermsOct($f) {
     }
     return substr(sprintf('%o', fileperms($f)), -4);
 }
+
 /**
  * 获取文件的Owner、Group、Other的权限信息
  * @param type $f
@@ -386,6 +395,7 @@ function GetFilePerms($f) {
 
     return $info;
 }
+
 /**
  * $s|$name  star|wang
  * @param type $s
@@ -402,6 +412,7 @@ function AddNameInString($s, $name) {
     $pl = trim(implode('|', $apl), '|');
     return $pl;
 }
+
 /**
  * DelNameInString('ssss|wang|uuuu', 'wang');
  * ssss|uuuu
@@ -422,6 +433,7 @@ function DelNameInString($s, $name) {
     $pl = trim(implode('|', $apl), '|');
     return $pl;
 }
+
 /**
  * HasNameInString('ssss|wang|uuuu', 'wang');
  * true
@@ -459,6 +471,7 @@ function ScriptError($faultString) {
     echo 'alert("' . str_replace('"', '\"', $faultString) . '")';
     die();
 }
+
 /**
  * 通过正则表达式来检测用户名，邮箱，密码，QQ，和个人主页
  * @param type $source
@@ -579,7 +592,6 @@ function SubStrUTF8($sourcestr, $cutlength) {
         $temp_str = substr($sourcestr, $i, 1);
         $ascnum = Ord($temp_str); //得到字符串中第$i位字符的ascii码
         if ($ascnum >= 224) { //如果ASCII位高于224，
-
             $returnstr = $returnstr . substr($sourcestr, $i, 3); //根据UTF-8编码规范，将3个连续的字符计为单个字符
             $i = $i + 3; //实际Byte计为3
             $n++; //字串长度计1
@@ -588,12 +600,10 @@ function SubStrUTF8($sourcestr, $cutlength) {
             $i = $i + 2; //实际Byte计为2
             $n++; //字串长度计1
         } elseif ($ascnum >= 65 && $ascnum <= 90) { //如果是大写字母，
-
             $returnstr = $returnstr . substr($sourcestr, $i, 1);
             $i = $i + 1; //实际的Byte数仍计1个
             $n++; //但考虑整体美观，大写字母计成一个高位字符
         } else { //其他情况下，包括小写字母和半角标点符号，
-
             $returnstr = $returnstr . substr($sourcestr, $i, 1);
             $i = $i + 1; //实际的Byte数计1个
             $n = $n + 0.5; //小写字母和半角标点等与半个高位字符宽...

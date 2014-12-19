@@ -4,12 +4,6 @@
  * 2014-12-15
  * for myblog
  */
-
-/**
- * 完成初始化工作
- * 
- * 
- */
 require './admin/function/function_base.php';
 
 $tqb->CheckGzip();
@@ -18,7 +12,6 @@ $tqb->RedirectInstall(true);
 foreach ($GLOBALS['Filter_Plugin_Index_Begin'] as $fpname => &$fpsignal) {
     $fpname();
 }
-
 $url = GetRequestUri();
 
 if ($url == $cookiespath || $url == $cookiespath . 'index.php') {
@@ -32,7 +25,6 @@ if ($url == $cookiespath || $url == $cookiespath . 'index.php') {
 } else {
     ViewAuto($url);
 }
-
 foreach ($GLOBALS['Filter_Plugin_Index_End'] as $fpname => &$fpsignal) {
     $fpname();
 }

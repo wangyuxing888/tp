@@ -1,258 +1,220 @@
 <?php
 /**
- * [TQBlog] (C)2008-2028 tqtqtq.com
- * @author TQBlog Team
- * This is NOT a freeware, use is subject to license terms
- * $Id: template.php 33828 2008-02-22 09:25:26Z team $
+ * 模版文件
  */
+class Template {
 
-class Template{
-	public $templates = array();
-	public $tags = array();
-	public $path = null;
+    public $templates = array();
+    public $tags = array();
+    public $path = null;
+    function __construct() {
+        
+    }
 
-	function __construct(){
-	}
+    public function SetPath($path) {
+        $this->path = $path;
+    }
 
-	public function SetPath($path)
-	{
-		 $this->path= $path;
-	}
+    function &GetTags($name) {
+        return $this->tags[$name];
+    }
 
-	function &GetTags($name){
-		return $this->tags[$name];
-	}
+    function SetTags($name, $value) {
+        $this->tags[$name] = $value;
+    }
 
-	function SetTags($name,$value){
-		$this->tags[$name]=$value;
-	}
+    function CompileFiles($filesarray) {
+        foreach ($filesarray as $name => $content) {
+            @file_put_contents($this->path . $name . '.php', $this->Compiling($content));
+            //if(function_exists('chmod')){
+            //	@chmod($this->path . $name . '.php',0755);
+            //}
+        }
+    }
 
+    public function Compiling($content) {
+        foreach ($GLOBALS['Filter_Plugin_Template_Compiling_Begin'] as $fpname => &$fpsignal) {
+            $fpreturn = $fpname($this, $content);
+            if ($fpsignal == PLUGIN_EXITSIGNAL_RETURN) {
+                return $fpreturn;
+            }
+        }
+        //Step1:替换<?php块
+        $this->replacePHP($content);
+        //Step2:引入主题
+        $this->parse_template($content);
+        //Step3:替换配置
+        $this->parse_option($content);
+        //Step4:替换标签
+        $this->parse_vars($content);
+        //Step?:替换函数
+        $this->parse_function($content);
+        //Step5:解析If
+        $this->parse_if($content);
+        //Step6:解析foreach
+        $this->parse_foreach($content);
+        //Step7:解析for
+        $this->parse_for($content);
+        //Step8:解析module
+        $this->parse_module($content);
+        //StepN:解析PHP
+        $this->parsePHP($content);
+        foreach ($GLOBALS['Filter_Plugin_Template_Compiling_End'] as $fpname => &$fpsignal) {
+            $fpreturn = $fpname($this, $content);
+            if ($fpsignal == PLUGIN_EXITSIGNAL_RETURN) {
+                return $fpreturn;
+            }
+        }
+        return $content;
+    }
 
-	function CompileFiles($filesarray){
+    private function replacePHP(&$content) {
+        $content = preg_replace("/\<\?php[\d\D]+?\?\>/si", '', $content);
+    }
 
-		foreach ($filesarray as $name => $content) {
-			@file_put_contents($this->path . $name . '.php', $this->Compiling($content));
-			//if(function_exists('chmod')){
-			//	@chmod($this->path . $name . '.php',0755);
-			//}
-		}
+    private function parse_template(&$content) {
+        $content = preg_replace('/\{template:([^\}]+)\}/', '{php} include $this->GetTemplate(\'$1\'); {/php}', $content);
+    }
 
-	}
+    private function parse_module(&$content) {
+        $content = preg_replace('/\{module:([^\}]+)\}/', '{php} if(isset($modules[\'$1\'])){echo $modules[\'$1\']->Content;} {/php}', $content);
+    }
 
-	public function Compiling($content)
-	{
+    private function parse_option(&$content) {
+        $content = preg_replace('#\{\#([^\}]+)\#\}#', '<?php echo $option[\'\\1\']; ?>', $content);
+    }
 
-		foreach ($GLOBALS['Filter_Plugin_Template_Compiling_Begin'] as $fpname => &$fpsignal)
-		{
-			$fpreturn = $fpname($this,$content);
-			if ($fpsignal==PLUGIN_EXITSIGNAL_RETURN) {return $fpreturn;}
-		}
+    private function parsePHP(&$content) {
+        $content = preg_replace('/\{php\}([\D\d]+?)\{\/php\}/', '<?php $1 ?>', $content);
+    }
 
-		//Step1:替换<?php块
-		$this->replacePHP($content);
-		//Step2:引入主题
-		$this->parse_template($content);
-		//Step3:替换配置
-		$this->parse_option($content);
-		//Step4:替换标签
-		$this->parse_vars($content);
-		//Step?:替换函数
-		$this->parse_function($content);
-		//Step5:解析If
-		$this->parse_if($content);
-		//Step6:解析foreach
-		$this->parse_foreach($content);
-		//Step7:解析for
-		$this->parse_for($content);
-		//Step8:解析module
-		$this->parse_module($content);
-		//StepN:解析PHP
-		$this->parsePHP($content);
+    private function parse_vars(&$content) {
+        $content = preg_replace_callback('#\{\$(?!\()([^\}]+)\}#', array($this, 'parse_vars_replace_dot'), $content);
+    }
 
-		foreach ($GLOBALS['Filter_Plugin_Template_Compiling_End'] as $fpname => &$fpsignal)
-		{
-			$fpreturn=$fpname($this,$content);
-			if ($fpsignal==PLUGIN_EXITSIGNAL_RETURN) {return $fpreturn;}
-		}
+    private function parse_function(&$content) {
+        $content = preg_replace_callback('/\{([a-zA-Z0-9_]+?)\((.+?)\)\}/', array($this, 'parse_funtion_replace_dot'), $content);
+    }
 
-		return $content;
-	}
+    private function parse_if(&$content) {
+        while (preg_match('/\{if [^\n\}]+\}.*?\{\/if\}/s', $content))
+            $content = preg_replace_callback(
+                    '/\{if ([^\n\}]+)\}(.*?)\{\/if\}/s', array($this, 'parse_if_sub'), $content
+            );
+    }
 
-	private function replacePHP(&$content)
-	{
-		$content = preg_replace("/\<\?php[\d\D]+?\?\>/si", '', $content);
-	}
+    private function parse_if_sub($matches) {
 
-	private function parse_template(&$content)
-	{
-		$content = preg_replace('/\{template:([^\}]+)\}/', '{php} include $this->GetTemplate(\'$1\'); {/php}', $content);
-	}
+        $content = preg_replace_callback(
+                '/\{elseif ([^\n\}]+)\}/', array($this, 'parse_elseif'), $matches[2]
+        );
 
-	private function parse_module(&$content)
-	{
-		$content = preg_replace('/\{module:([^\}]+)\}/', '{php} if(isset($modules[\'$1\'])){echo $modules[\'$1\']->Content;} {/php}', $content);
-	}
+        $ifexp = str_replace($matches[1], $this->replace_dot($matches[1]), $matches[1]);
 
-	private function parse_option(&$content)
-	{
-		$content = preg_replace('#\{\#([^\}]+)\#\}#', '<?php echo $option[\'\\1\']; ?>', $content);
-	}
+        $content = str_replace('{else}', '{php}}else{ {/php}', $content);
+        return "<?php if ($ifexp) { ?>$content<?php } ?>";
+    }
 
-	private function parsePHP(&$content)
-	{
-		$content = preg_replace('/\{php\}([\D\d]+?)\{\/php\}/', '<?php $1 ?>', $content);
-	}
+    private function parse_elseif($matches) {
+        $ifexp = str_replace($matches[1], $this->replace_dot($matches[1]), $matches[1]);
+        return "{php}}elseif($ifexp) { {/php}";
+    }
 
-	private function parse_vars(&$content)
-	{
-		$content = preg_replace_callback('#\{\$(?!\()([^\}]+)\}#',array($this,'parse_vars_replace_dot'), $content);
-	}
+    private function parse_foreach(&$content) {
+        while (preg_match('/\{foreach(.+?)\}(.+?){\/foreach}/s', $content))
+            $content = preg_replace_callback(
+                    '/\{foreach(.+?)\}(.+?){\/foreach}/s', array($this, 'parse_foreach_sub'), $content
+            );
+    }
 
-	private function parse_function(&$content)
-	{
-		$content = preg_replace_callback('/\{([a-zA-Z0-9_]+?)\((.+?)\)\}/',array($this,'parse_funtion_replace_dot'), $content);
-	}
+    private function parse_foreach_sub($matches) {
+        $exp = $this->replace_dot($matches[1]);
+        $code = $matches[2];
+        return "{php} foreach ($exp) {{/php} $code{php} }  {/php}";
+    }
 
-	private function parse_if(&$content)
-	{
-		while(preg_match('/\{if [^\n\}]+\}.*?\{\/if\}/s', $content))
-			$content = preg_replace_callback(
-				'/\{if ([^\n\}]+)\}(.*?)\{\/if\}/s',
-				array($this,'parse_if_sub'),
-				$content
-			);
-	}
+    private function parse_for(&$content) {
+        while (preg_match('/\{for(.+?)\}(.+?){\/for}/s', $content))
+            $content = preg_replace_callback(
+                    '/\{for(.+?)\}(.+?){\/for}/s', array($this, 'parse_for_sub'), $content
+            );
+    }
 
-	private function parse_if_sub($matches)
-	{
+    private function parse_for_sub($matches) {
+        $exp = $this->replace_dot($matches[1]);
+        $code = $matches[2];
+        return "{php} for($exp) {{/php} $code{php} }  {/php}";
+    }
 
-		$content = preg_replace_callback(
-			'/\{elseif ([^\n\}]+)\}/',
-			array($this, 'parse_elseif'),
-			$matches[2]
-		);
+    private function parse_vars_replace_dot($matches) {
+        if (strpos($matches[1], '=') === false) {
+            return '{php} echo $' . $this->replace_dot($matches[1]) . '; {/php}';
+        } else {
+            return '{php} $' . $this->replace_dot($matches[1]) . '; {/php}';
+        }
+    }
 
-		$ifexp = str_replace($matches[1],$this->replace_dot($matches[1]),$matches[1]);
+    private function parse_funtion_replace_dot($matches) {
+        return '{php} echo ' . $matches[1] . '(' . $this->replace_dot($matches[2]) . '); {/php}';
+    }
 
-		$content = str_replace('{else}', '{php}}else{ {/php}', $content);
-		return "<?php if ($ifexp) { ?>$content<?php } ?>";
+    private function replace_dot($content) {
+        $array = array();
+        preg_match_all('/".+?"|\'.+?\'/', $content, $array, PREG_SET_ORDER);
+        if (count($array) > 0) {
+            foreach ($array as $a) {
+                $a = $a[0];
+                if (strstr($a, '.') != false) {
+                    $b = str_replace('.', '{%_dot_%}', $a);
+                    $content = str_replace($a, $b, $content);
+                }
+            }
+        }
+        $content = str_replace(' . ', ' {%_dot_%} ', $content);
+        $content = str_replace('. ', '{%_dot_%} ', $content);
+        $content = str_replace(' .', ' {%_dot_%}', $content);
+        $content = str_replace('.', '->', $content);
+        $content = str_replace('{%_dot_%}', '.', $content);
+        return $content;
+    }
 
-	}
+    public function GetTemplate($name) {
+        foreach ($GLOBALS['Filter_Plugin_Template_GetTemplate'] as $fpname => &$fpsignal) {
+            $fpreturn = $fpname($this, $name);
+            if ($fpsignal == PLUGIN_EXITSIGNAL_RETURN) {
+                return $fpreturn;
+            }
+        }
+        return $this->path . $name . '.php';
+    }
 
-	private function parse_elseif($matches)
-	{
-		$ifexp = str_replace($matches[1],$this->replace_dot($matches[1]),$matches[1]);
-		return "{php}}elseif($ifexp) { {/php}";
-	}
+    private $templatename = null;
 
+    public function SetTemplate($templatename) {
+        $this->templatename = $templatename;
+    }
 
-	private function parse_foreach(&$content)
-	{
-		while(preg_match('/\{foreach(.+?)\}(.+?){\/foreach}/s', $content))
-			$content = preg_replace_callback(
-				'/\{foreach(.+?)\}(.+?){\/foreach}/s',
-				array($this,'parse_foreach_sub'),
-				$content
-			);
-	}
+    #模板入口
 
-	private function parse_foreach_sub($matches)
-	{
-		$exp = $this->replace_dot($matches[1]);
-		$code = $matches[2];
-		return "{php} foreach ($exp) {{/php} $code{php} }  {/php}";
-	}
-	private function parse_for(&$content)
-	{
-		while(preg_match('/\{for(.+?)\}(.+?){\/for}/s', $content))
-			$content = preg_replace_callback(
-				'/\{for(.+?)\}(.+?){\/for}/s',
-				array($this,'parse_for_sub'),
-				$content
-			);
-	}
+    public function Display() {
+        #强制撤除所有错误监控
+        if ($GLOBALS['option']['CFG_DEBUG_MODE'] == false) {
+            TQBlogException::ClearErrorHook();
+        }
+        #入口处将tags里的变量提升全局!!!
+        foreach ($this->tags as $key => &$value) {
+            $$key = &$value;
+        }
+        include $this->path . $this->templatename . '.php';
+    }
 
-	private function parse_for_sub($matches)
-	{
-		$exp = $this->replace_dot($matches[1]);
-		$code = $matches[2];
-		return "{php} for($exp) {{/php} $code{php} }  {/php}";
-	}
+    public function Output() {
 
-	private function parse_vars_replace_dot($matches)
-	{
-		if(strpos($matches[1],'=')===false){
-			return '{php} echo $' . $this->replace_dot($matches[1]) . '; {/php}';
-		}else{
-			return '{php} $' . $this->replace_dot($matches[1]) . '; {/php}';
-		}
-	}
-
-	private function parse_funtion_replace_dot($matches)
-	{
-		return '{php} echo ' . $matches[1] . '(' . $this->replace_dot($matches[2]) . '); {/php}';
-	}
-
-	private function replace_dot($content)
-	{
-		$array=array();
-		preg_match_all('/".+?"|\'.+?\'/', $content,$array,PREG_SET_ORDER);
-		if(count($array)>0){
-			foreach($array as $a){
-				$a=$a[0];
-				if(strstr($a,'.')!=false){
-					$b=str_replace('.','{%_dot_%}',$a);
-					$content=str_replace($a,$b,$content);
-				}
-			}
-		}
-		$content=str_replace(' . ',' {%_dot_%} ',$content);
-		$content=str_replace('. ','{%_dot_%} ',$content);
-		$content=str_replace(' .',' {%_dot_%}',$content);
-		$content=str_replace('.','->',$content);
-		$content=str_replace('{%_dot_%}','.',$content);
-		return $content;
-	}
-
-	public function GetTemplate($name)
-	{
-		foreach ($GLOBALS['Filter_Plugin_Template_GetTemplate'] as $fpname => &$fpsignal)
-		{
-			$fpreturn=$fpname($this,$name);
-			if ($fpsignal==PLUGIN_EXITSIGNAL_RETURN) {return $fpreturn;}
-		}
-		return $this->path . $name . '.php';
-	}
-
-	private $templatename=null;
-	public function SetTemplate( $templatename)
-	{
-		 $this->templatename= $templatename;
-	}
-
-	#模板入口
-	public function Display()
-	{
-		#强制撤除所有错误监控
-		if($GLOBALS['option']['CFG_DEBUG_MODE']==false){
-			TQBlogException::ClearErrorHook();
-		}
-		#入口处将tags里的变量提升全局!!!
-		foreach ($this->tags as $key => &$value) {
-			$$key=&$value;
-		}
-		include $this->path .  $this->templatename . '.php';
-	}
-
-	public function Output()
-	{
-
-		ob_start();
-		$this->Display($this->templatename);
-		$data = ob_get_contents();
-		ob_end_clean();
-		return $data;
-
-	}
+        ob_start();
+        $this->Display($this->templatename);
+        $data = ob_get_contents();
+        ob_end_clean();
+        return $data;
+    }
 
 }

@@ -4,7 +4,7 @@
                 <?php if ($qq) { ?><a href="http://wpa.qq.com/msgrd?V=3&Uin=<?php  echo $qq;  ?>&Site=<?php  echo $name;  ?>&Menu=yes&from=TQBlog" target="_blank" title="QQ"><img src="admin/image/common/site_qq.png" alt="QQ" /> </a><?php } ?>
             	<?php  echo $copyright;  ?>
             </h3>
-			<h4 id="BlogPowerBy"></h4>
+			<h4 id="BlogPowerBy">Powered by <?php  echo $tqblogphphtml;  ?></h4>
 		</div><div class="clear"></div>
 	</div><div class="clear"></div>
 	</div><div class="clear"></div>
