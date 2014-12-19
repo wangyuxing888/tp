@@ -37,6 +37,7 @@ switch ($action) {
     case 'CategoryAdmin':
         $f = 'Admin_CategoryAdmin';
         $blogtitle = $lang['msg']['category_manage'];
+        //print_r(get_class($lang));
         break;
     case 'TagAdmin':
         $f = 'Admin_TagAdmin';
@@ -86,7 +87,6 @@ $f();
 </div>
 <?php
 require $blogpath . 'admin/admin/admin_footer.php';
-
 foreach ($GLOBALS['Filter_Plugin_Admin_End'] as $fpname => &$fpsignal) {
     $fpname();
 }

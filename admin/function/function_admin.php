@@ -64,7 +64,6 @@ $topmenus = array();
 $leftmenus = array();
 
 function ResponseAdmin_LeftMenu() {
-
     global $tqb;
     global $leftmenus;
 
@@ -74,7 +73,6 @@ function ResponseAdmin_LeftMenu() {
     $leftmenus[] = BuildLeftMenu("CommentAdmin", $tqb->lang['msg']['comment_manage'], $tqb->host . "admin/admin.php?act=CommentAdmin", "nav_comments", "aCommentAdmin", "");
 
     $leftmenus[] = "<li class='split'><hr/></li>";
-
 
     $leftmenus[] = BuildLeftMenu("CategoryAdmin", $tqb->lang['msg']['category_manage'], $tqb->host . "admin/admin.php?act=CategoryAdmin", "nav_category", "aCategoryAdmin", "");
     $leftmenus[] = BuildLeftMenu("TagAdmin", $tqb->lang['msg']['tag_manage'], $tqb->host . "admin/admin.php?act=TagAdmin", "nav_tags", "aTagAdmin", "");
@@ -90,7 +88,6 @@ function ResponseAdmin_LeftMenu() {
     foreach ($GLOBALS['Filter_Plugin_Admin_LeftMenu'] as $fpname => &$fpsignal) {
         $fpname($leftmenus);
     }
-
     foreach ($leftmenus as $m) {
         echo $m;
     }
@@ -549,7 +546,6 @@ function Admin_PageAdmin() {
 
 //********************************************************
 function Admin_CategoryAdmin() {
-
     global $tqb;
 
     echo '<div class="divHeader">' . $tqb->lang['msg']['category_manage'] . '</div>';
@@ -569,7 +565,6 @@ function Admin_CategoryAdmin() {
 	<th>' . $tqb->lang['msg']['post_count'] . '</th>
 	<th></th>
 	</tr>';
-
 
     foreach ($tqb->categorysbyorder as $category) {
         echo '<tr>';
